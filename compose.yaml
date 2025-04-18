@@ -1,0 +1,40 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db_ka
+    environment:
+      MYSQL_ROOT_PASSWORD: 2250238116
+      MYSQL_DATABASE: KnowledgeApplication
+
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - db_network
+
+  neo4j:
+    image: neo4j:4.4
+    container_name: neo4j_db_ka
+    environment:
+      NEO4J_AUTH: neo4j/2250238116
+      NEO4J_dbms_connector_bolt_advertised__address: "localhost:7687"
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    restart: unless-stopped
+    networks:
+      - db_network
+
+volumes:
+  mysql_data:
+  neo4j_data:
+  neo4j_logs:
+
+networks:
+  db_network:
+    driver: bridge

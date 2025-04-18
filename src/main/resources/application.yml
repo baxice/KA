@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: KnowledgeApplication
+  datasource:
+    url: jdbc:mysql://localhost:3306/mysql_db_ka?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 2250238116
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: password
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8081
+  servlet:
+    context-path: /knowledge
+  encoding:
+    charset: GBK
+    force: true
+    enabled: true
+  tomcat:
+    uri-encoding: GBK
+    basedir: logs/tomcat
+
+jwt:
+  secret: your-32-char-long-secret-key-1234567890abcdef
+  validity: 3600000              # 1小时有效期(ms)
