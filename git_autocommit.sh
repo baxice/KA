@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Git 自动提交脚本（带版本号递增）
+# Git 自动提交脚本（递增第三位版本号）
 
 # 检查是否在 Git 仓库中
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
@@ -31,9 +31,9 @@ else
     exit 1
 fi
 
-# 递增版本号（第二位 +1）
-NEW_MINOR=$((MINOR + 2))
-NEW_VERSION="V${MAJOR}.${NEW_MINOR}.0"
+# 递增版本号（第三位 +1）
+NEW_PATCH=$((PATCH + 1))
+NEW_VERSION="V${MAJOR}.${MINOR}.${NEW_PATCH}"
 
 # 更新版本文件
 echo "$NEW_VERSION" > "$VERSION_FILE"
