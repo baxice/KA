@@ -1,72 +1,61 @@
 package com.example.knowledgeapplication.controller;
 
-import com.example.knowledgeapplication.exception.BusinessException;
-import com.example.knowledgeapplication.exception.ErrorCode;
-import com.example.knowledgeapplication.service.AuthService;
-import com.example.knowledgeapplication.util.ResultV0;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.knowledgeapplication.dto.EmailVerificationRequest;
+import com.example.knowledgeapplication.dto.LoginRequest;
+import com.example.knowledgeapplication.dto.LoginResponse;
+import com.example.knowledgeapplication.dto.PasswordResetRequest;
+import com.example.knowledgeapplication.dto.RegisterRequest;
+import com.example.knowledgeapplication.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final UserService userService;
 
-    // 处理登录请求
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
+
     @PostMapping("/login")
-    @ResponseBody
-    public ResponseEntity<ResultV0<Map<String, String>>> login(
-            @RequestParam String email,
-            @RequestParam String password) {
-        
-        // 调用服务层方法生成JWT
-        String token = authService.login(email, password);
-        
-        // 返回包含JWT的响应
-        Map<String, String> result = new HashMap<>();
-        result.put("token", token);
-        
-        return ResponseEntity.ok(ResultV0.success(result));
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        LoginResponse response = userService.login(loginRequest);
+        return ResponseEntity.ok(response);
     }
 
-    // 处理注册请求
     @PostMapping("/register")
-    @ResponseBody
-    public ResponseEntity<ResultV0<Map<String, String>>> register(
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam String confirmPassword) {
-        
-        // 密码一致性校验
-        if(!password.equals(confirmPassword)) {
-            throw new BusinessException(ErrorCode.PARAM_VALIDATION_ERROR, "两次密码不一致");
-        }
-        
-        // 调用服务层方法注册并生成JWT
-        String token = authService.register(email, password);
-        
-        // 返回包含JWT的响应
-        Map<String, String> result = new HashMap<>();
-        result.put("token", token);
-        
-        return ResponseEntity.ok(ResultV0.success(result));
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        LoginResponse response = userService.register(registerRequest);
+        return ResponseEntity.ok(response);
     }
-    
-    // 前端页面模板
-    @GetMapping("/login")
-    public String showLoginForm() {
-        return "auth/login";
+
+    @PostMapping("/send-verification-code")
+    public ResponseEntity<Map<String, String>> sendVerificationCode(@RequestParam String email) {
+        userService.sendVerificationCode(email);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "验证码已发送");
+        return ResponseEntity.ok(response);
     }
-    
-    @GetMapping("/register")
-    public String showRegisterForm() {
-        return "auth/register";
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody EmailVerificationRequest request) {
+        userService.verifyEmail(request.getEmail(), request.getCode());
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "邮箱验证成功");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody PasswordResetRequest request) {
+        userService.resetPassword(request);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "密码重置成功");
+        return ResponseEntity.ok(response);
     }
 }

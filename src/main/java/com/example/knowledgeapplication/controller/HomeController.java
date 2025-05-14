@@ -1,13 +1,18 @@
 package com.example.knowledgeapplication.controller;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.HashMap;
+import java.util.Map;
 
-@Controller
+@RestController
 public class HomeController {
     
     @GetMapping("/")
-    public String home() {
-        return "redirect:/auth/login";
+    public ResponseEntity<Map<String, String>> home() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Welcome to Knowledge Application API");
+        return ResponseEntity.ok(response);
     }
 } 

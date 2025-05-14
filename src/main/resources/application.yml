@@ -1,38 +1,111 @@
 spring:
   application:
-    name: KnowledgeApplication
+    name: knowledge-application
   datasource:
-    url: jdbc:mysql://localhost:3306/mysql_db_ka?useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://knowledge-mysql:3306/KnowledgeApplication?useSSL=false&serverTimezone=UTC
     username: root
     password: 2250238116
     driver-class-name: com.mysql.cj.jdbc.Driver
   neo4j:
-    uri: bolt://localhost:7687
+    uri: bolt://knowledge-neo4j:7687
     authentication:
       username: neo4j
-      password: password
+      password: 2250238116
   servlet:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: your-email@qq.com
+    password: your-email-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+      additional-paths: src/main/resources
+      exclude: static/**,public/**
 
 server:
-  port: 8081
+  port: 8080
   servlet:
     context-path: /knowledge
   encoding:
-    charset: GBK
+    charset: UTF-8
     force: true
     enabled: true
   tomcat:
-    uri-encoding: GBK
+    uri-encoding: UTF-8
     basedir: logs/tomcat
 
 jwt:
-  secret: your-32-char-long-secret-key-1234567890abcdef
-  validity: 3600000              # 1小时有效期(ms)
+  secretKey: GSGJgXOpkVZXyg7orlF7J42mSyM2tx5G
+  expirationTime: 86400000  # 24小时，单位：毫秒
+  tokenPrefix: "Bearer "
+  headerString: "Authorization"
+
+email:
+  providers:
+    default-provider: qq
+    qq:
+      host: smtp.qq.com
+      port: 587
+      username: your-qq-email@qq.com
+      password: your-qq-email-password
+      ssl: false
+      tls: true
+      from-name: "知识应用系统"
+      from-address: your-qq-email@qq.com
+    gmail:
+      host: smtp.gmail.com
+      port: 587
+      username: your-gmail@gmail.com
+      password: your-gmail-app-password
+      ssl: false
+      tls: true
+      from-name: "Knowledge Application"
+      from-address: your-gmail@gmail.com
+    163:
+      host: smtp.163.com
+      port: 465
+      username: your-163-email@163.com
+      password: your-163-email-password
+      ssl: true
+      tls: false
+      from-name: "知识应用系统"
+      from-address: your-163-email@163.com
+  verification:
+    code-expiration: 300  # 验证码有效期（秒）
+    template: |
+      <html>
+        <body>
+          <h2>邮箱验证码</h2>
+          <p>您的验证码是：<strong>%s</strong></p>
+          <p>验证码有效期为5分钟，请尽快使用。</p>
+          <p>如果这不是您的操作，请忽略此邮件。</p>
+        </body>
+      </html>
+
+minio:
+  endpoint: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucket: knowledge-application

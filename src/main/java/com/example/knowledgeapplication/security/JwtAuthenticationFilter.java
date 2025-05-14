@@ -1,8 +1,7 @@
 package com.example.knowledgeapplication.security;
 
+import com.example.knowledgeapplication.config.JwtConfig;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +14,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.lang.NonNull;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * JWT认证过滤器
@@ -28,10 +27,12 @@ import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final String secretKey;
+    private final JwtTokenProvider tokenProvider;
+    private final JwtConfig jwtConfig;
 
-    public JwtAuthenticationFilter(String secretKey) {
-        this.secretKey = secretKey;
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, JwtConfig jwtConfig) {
+        this.tokenProvider = tokenProvider;
+        this.jwtConfig = jwtConfig;
     }
 
     @Override
@@ -43,13 +44,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 1. 从Header提取Token
         String token = extractToken(request);
 
-        if (token != null) {
+        if (token != null && tokenProvider.validateToken(token)) {
             try {
                 // 2. 验证并解析Token
-                Claims claims = parseToken(token);
-
+                String username = tokenProvider.getUsernameFromToken(token);
+                Claims claims = tokenProvider.getClaimsFromToken(token);
+                
                 // 3. 构建Authentication对象
-                Authentication auth = createAuthentication(claims);
+                List<SimpleGrantedAuthority> authorities = Arrays.stream(claims.get("roles", String.class)
+                        .split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+                Authentication auth = new UsernamePasswordAuthenticationToken(
+                        username,
+                        null,
+                        authorities
+                );
 
                 // 4. 设置安全上下文
                 SecurityContextHolder.getContext().setAuthentication(auth);
@@ -67,34 +78,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        String bearerToken = request.getHeader(jwtConfig.getHeaderString());
+        if (bearerToken != null && bearerToken.startsWith(jwtConfig.getTokenPrefix())) {
+            return bearerToken.substring(jwtConfig.getTokenPrefix().length());
         }
         return null;
-    }
-
-    private Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    private Authentication createAuthentication(Claims claims) {
-        // 从claims中提取用户信息（根据你的JWT实际结构调整）
-        String username = claims.getSubject();
-
-        // 示例：从claims获取角色（需与JWT生成逻辑一致）
-        List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_USER") // 默认角色
-        );
-
-        return new UsernamePasswordAuthenticationToken(
-                username,
-                null, // credentials通常为null
-                authorities);
     }
 
     @Override

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户资料</title>
+    <link rel="stylesheet" href="/css/avatar.css">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- 开发环境下的LiveReload支持 -->
+    <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled', Boolean)}" 
+            src="http://localhost:35729/livereload.js"></script>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div id="user-avatar"></div>
+                <h3 class="user-name" th:text="${user.username}">用户名</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="#profile">
+                            <i class="fas fa-user"></i>
+                            <span>个人资料</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#security">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>账号安全</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#notifications">
+                            <i class="fas fa-bell"></i>
+                            <span>消息通知</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#preferences">
+                            <i class="fas fa-cog"></i>
+                            <span>偏好设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <div class="content-header">
+                <h2>个人资料</h2>
+            </div>
+            <div class="content-body">
+                <!-- 个人资料表单 -->
+                <form class="profile-form">
+                    <div class="form-group">
+                        <label for="email">邮箱</label>
+                        <input type="email" id="email" th:value="${user.email}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="nickname">昵称</label>
+                        <input type="text" id="nickname" th:value="${user.nickname}">
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">个人简介</label>
+                        <textarea id="bio" rows="4" th:text="${user.bio}"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">保存更改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/components/UserAvatar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new UserAvatar('user-avatar');
+        });
+    </script>
+</body>
+</html> 

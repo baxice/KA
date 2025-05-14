@@ -9,22 +9,40 @@ public class ResultV0<T> {
     private T data;
     private String detail;
 
-    private ResultV0(Integer code, String message, T data, String detail) {
-        this.code = code;
-        this.message = message;
-        this.data = data;
-        this.detail = detail;
+    public static <T> ResultV0<T> success() {
+        return success(null);
     }
 
     public static <T> ResultV0<T> success(T data) {
-        return new ResultV0<>(200, "success", data, null);
+        ResultV0<T> result = new ResultV0<>();
+        result.setCode(200);
+        result.setMessage("操作成功");
+        result.setData(data);
+        return result;
     }
 
     public static <T> ResultV0<T> error(Integer code, String message) {
-        return new ResultV0<>(code, message, null, null);
+        return error(code, message, null);
     }
 
-    public static <T> ResultV0<T> error(Integer code, String message, String detail) {
-        return new ResultV0<>(code, message, null, detail);
+    public static <T> ResultV0<T> error(Integer code, String message, T data) {
+        return error(code, message, data, null);
+    }
+
+    public static <T> ResultV0<T> error(Integer code, String message, T data, String detail) {
+        ResultV0<T> result = new ResultV0<>();
+        result.setCode(code);
+        result.setMessage(message);
+        result.setData(data);
+        result.setDetail(detail);
+        return result;
+    }
+
+    public static <T> ResultV0<T> error(String code, String message, String detail) {
+        ResultV0<T> result = new ResultV0<>();
+        result.setCode(500);
+        result.setMessage(message);
+        result.setDetail(detail);
+        return result;
     }
 }

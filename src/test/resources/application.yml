@@ -11,5 +11,5 @@ spring:
     show-sql: true
 
 jwt:
-  secret: your-32-char-long-secret-key-1234567890abcdef
+  secret: GSGJgXOpkVZXyg7orlF7J42mSyM2tx5G
   validity: 3600000

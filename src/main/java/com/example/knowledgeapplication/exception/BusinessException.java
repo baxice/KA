@@ -12,20 +12,24 @@ import lombok.Getter;
 @Getter
 public class BusinessException extends RuntimeException {
 
-    private final int code;       // 错误码
-    private final String detail;  // 补充信息
+    private final String code;       // 错误码
+    private final String detail;     // 补充信息
 
-    // 使用预定义错误码的构造器
-    public BusinessException(ErrorCode errorCode) {
-        super(errorCode.getMessage());
-        this.code = errorCode.getCode();
-        this.detail = null;
+    public BusinessException(String message) {
+        super(message);
+        this.code = "BUSINESS_ERROR";
+        this.detail = message;
     }
 
-    // 使用预定义错误码和自定义消息的构造器
-    public BusinessException(ErrorCode errorCode, String detail) {
-        super(errorCode.getMessage());
-        this.code = errorCode.getCode();
+    public BusinessException(String code, String message) {
+        super(message);
+        this.code = code;
+        this.detail = message;
+    }
+
+    public BusinessException(String code, String message, String detail) {
+        super(message);
+        this.code = code;
         this.detail = detail;
     }
 }

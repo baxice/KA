@@ -9,9 +9,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -41,8 +46,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResultV0<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        ResultV0<Map<String, String>> result = ResultV0.error(400, "参数验证失败", errors);
+        return ResponseEntity.badRequest().body(result);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ResultV0<String>> handleRuntimeException(RuntimeException ex) {
+        ResultV0<String> result = ResultV0.error(500, "服务器内部错误", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResultV0<String>> handleException(Exception e, HttpServletRequest request) {
+    public ResponseEntity<ResultV0<String>> handleException(Exception e) {
         ResultV0<String> result = ResultV0.error(500, "服务器内部错误", e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
     }

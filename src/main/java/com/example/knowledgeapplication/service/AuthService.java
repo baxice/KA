@@ -20,8 +20,8 @@ public class AuthService {
 
     public AuthService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
-                       @Value("${jwt.secret}") String jwtSecret,
-                       @Value("${jwt.validity}") long jwtValidity) {
+                       @Value("${jwt.secretKey}") String jwtSecret,
+                       @Value("${jwt.expirationTime}") long jwtValidity) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtSecret = jwtSecret;
@@ -38,7 +38,7 @@ public class AuthService {
     public String register(String email, String rawPassword) {
         // 1. 邮箱唯一性校验
         if (userRepository.existsByEmail(email)) {
-            throw new BusinessException(ErrorCode.USER_EXISTS);
+            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS.getMessage());
         }
 
         // 2. 密码加密存储
@@ -62,11 +62,11 @@ public class AuthService {
     public String login(String email, String rawPassword) {
         // 1. 查询用户
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND.getMessage()));
 
         // 2. 密码验证
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS.getMessage());
         }
 
         // 3. 生成JWT
@@ -80,12 +80,12 @@ public class AuthService {
      */
     public String validateToken(String token) {
         return JwtUtil.parseToken(token, jwtSecret)
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN.getMessage()));
     }
 
     public void validateEmailNotRegistered(String email) {
         if (userRepository.existsByEmail(email)) {
-            throw new BusinessException(ErrorCode.USER_EXISTS);
+            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS.getMessage());
         }
     }
 }
